@@ -1,4 +1,4 @@
-module.exports = async function edit({ data: { channel, message }, content, embed, components = [] }, client) {
+module.exports = async function edit({ data: { channel, message }, content, embed, components = [], preserveUI = false }, client) {
     if (typeof channel !== 'string') {
         throw new TypeError('Channel must be a string.');
     }
@@ -32,11 +32,17 @@ module.exports = async function edit({ data: { channel, message }, content, embe
         thumbnail: embed.thumbnail ? { url: embed.thumbnail } : undefined,
         author: embed.author ? { name: embed.author, icon_url: embed.authorIcon, url: embed.authorURL } : undefined,
         footer: embed.footer ? { text: embed.footer, icon_url: embed.footerIcon } : undefined,
-        timestamp: embed.timestamp ? new Date() : undefined
+        timestamp: embed.timestamp ? new Date() : undefined,
+        fields: Array.isArray(embed.fields) ? embed.fields.map(f => ({
+            name: f.name?.toString() || '\u200B',
+            value: f.value?.toString() || '\u200B',
+            inline: !!f.inline
+        })) : undefined
     } : undefined;
 
-    // === Optimización para components ===
-    const formattedComponents = components.flatMap(row => {
+    const oldComponents = preserveUI ? targetMessage.components : [];
+
+    const newComponents = components.flatMap(row => {
         if (Array.isArray(row)) {
             return row.map(component =>
                 typeof component.toJSON === 'function' ? component.toJSON() : component
@@ -49,9 +55,26 @@ module.exports = async function edit({ data: { channel, message }, content, embe
         throw new Error('Invalid component format: Components must be serialized ActionRows or builders.');
     });
 
+    let finalComponents = [];
+    if (preserveUI) {
+        finalComponents = [...oldComponents, ...newComponents];
+    } else {
+        finalComponents = newComponents;
+    }
+
+    if (finalComponents.length > 5) {
+        throw new Error('Too many component rows. Discord only allows up to 5 action rows.');
+    }
+
+    for (const row of finalComponents) {
+        if (row.components && row.components.length > 5) {
+            throw new Error('Too many components in a row. Discord only allows up to 5 components per action row.');
+        }
+    }
+
     await targetMessage.edit({
         content: content || undefined,
         embeds: embedOptions ? [embedOptions] : undefined,
-        components: formattedComponents.length > 0 ? formattedComponents : []
+        components: finalComponents
     });
 };
