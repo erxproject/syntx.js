@@ -40,7 +40,7 @@ $ npm i synxt.js
 
 In GitHub (recommended)
 ```console
-$ npm i github:syntx-js/syntx.js
+$ npm i github:erxproject/syntx.js
 ```
 
 # Tables of contents
