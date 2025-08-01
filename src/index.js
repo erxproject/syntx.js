@@ -42,6 +42,8 @@ const untimeout = require("./functions/user/untimeout")
 const ban = require("./functions/user/ban")
 const unban = require("./functions/user/unban")
 const channelCreate = require("./functions/channel/create")
+const deleteChannel = require("./functions/channel/delete")
+const editChannel = require("./functions/channel/edit")
 
 module.exports = {
     ...discord,
@@ -61,7 +63,9 @@ module.exports = {
             id: channelId,
             mentioned: mentionedChannel,
             create: Object.assign(channelCreate, { thread }),
-            info: channelInfo
+            info: channelInfo,
+            delete: deleteChannel,
+            edit: editChannel
         },
         role: {
             info: roleInfo
