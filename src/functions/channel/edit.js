@@ -1,7 +1,9 @@
 const { PermissionsBitField, ChannelType } = require("discord.js")
 
 function toCamelCase(str) {
-    return str.toLowerCase().replace(/_([a-z])/g, (_, l) => l.toUpperCase()).replace(/^([a-z])/, (_, l) => l.toUpperCase())
+    return str.toLowerCase()
+        .replace(/_([a-z])/g, (_, l) => l.toUpperCase())
+        .replace(/^([a-z])/, (_, l) => l.toUpperCase())
 }
 
 async function editChannel({ channel, data = {}, permissions = [] }, message) {
@@ -32,49 +34,69 @@ async function editChannel({ channel, data = {}, permissions = [] }, message) {
         throw new Error("'appliedTags' is only valid for forum channels")
 
     const payload = {
-        name: data.name,
-        topic: data.topic,
-        nsfw: data.nsfw,
-        rateLimitPerUser: data.cooldown,
-        parent: data.category ?? null,
-        position: data.position,
-        rtcRegion: data.rtcRegion,
-        bitrate: data.bitrate,
-        userLimit: data.userLimit,
-        defaultAutoArchiveDuration: data.autoArchiveDuration,
-        availableTags: data.availableTags,
-        appliedTags: data.appliedTags,
+        name: data.name ?? ch.name,
+        topic: data.topic ?? ch.topic,
+        nsfw: data.nsfw ?? ch.nsfw,
+        rateLimitPerUser: data.cooldown ?? ch.rateLimitPerUser,
+        parent: data.category ?? ch.parentId ?? null,
+        position: data.position ?? ch.rawPosition,
+        rtcRegion: data.rtcRegion ?? ch.rtcRegion,
+        bitrate: data.bitrate ?? ch.bitrate,
+        userLimit: data.userLimit ?? ch.userLimit,
+        defaultAutoArchiveDuration: data.autoArchiveDuration ?? ch.defaultAutoArchiveDuration,
+        availableTags: data.availableTags ?? ch.availableTags?.map(t => t.id),
+        appliedTags: data.appliedTags ?? ch.appliedTags,
         reason: data.reason
     }
 
-    Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k])
-
     if (permissions.length) {
-        const overwrites = []
+        const currentOverwrites = ch.permissionOverwrites.cache.map(po => ({
+            id: po.id,
+            type: po.type,
+            allow: new PermissionsBitField(po.allow).bitfield,
+            deny: new PermissionsBitField(po.deny).bitfield
+        }))
 
         for (const perm of permissions) {
             if (!perm.id || !perm.type || typeof perm.permissions !== "object") continue
 
-            const isEveryone = perm.id === "everyone"
-            const overwrite = {
-                id: isEveryone ? message.guild.id : perm.id,
-                type: perm.type === "user" ? 1 : 0,
-                allow: [],
-                deny: []
+            const targetId = perm.id === "everyone" ? message.guild.id : perm.id
+            let existing = currentOverwrites.find(o => o.id === targetId && o.type === (perm.type === "user" ? 1 : 0))
+
+            if (!existing) {
+                existing = {
+                    id: targetId,
+                    type: perm.type === "user" ? 1 : 0,
+                    allow: 0n,
+                    deny: 0n
+                }
+                currentOverwrites.push(existing)
             }
 
             for (const [permName, value] of Object.entries(perm.permissions)) {
                 const key = toCamelCase(permName)
                 const bit = PermissionsBitField.Flags[key]
                 if (!bit) throw new Error(`Invalid permission name: ${permName}`)
-                if (value) overwrite.allow.push(bit)
-                else overwrite.deny.push(bit)
-            }
 
-            overwrites.push(overwrite)
+                if (value === true) {
+                    existing.allow |= bit
+                    existing.deny &= ~bit
+                } else if (value === false) {
+                    existing.deny |= bit
+                    existing.allow &= ~bit
+                } else {
+                    existing.allow &= ~bit
+                    existing.deny &= ~bit
+                }
+            }
         }
 
-        payload.permissionOverwrites = overwrites
+        payload.permissionOverwrites = currentOverwrites.map(o => ({
+            id: o.id,
+            type: o.type,
+            allow: new PermissionsBitField(o.allow),
+            deny: new PermissionsBitField(o.deny)
+        }))
     }
 
     await ch.edit(payload)
