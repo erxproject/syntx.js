@@ -1,35 +1,45 @@
 {
   "name": "syntx.js",
-  "version": "1.0.0-github",
-  "description": "Create Discord bots a little faster and easier.",
-  "main": "./src",
+  "version": "1.0.1",
+  "description": "Create Discord bots faster and easier with syntx.js",
+  "main": "./src/index.js",
+  "types": "./typings/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./src/index.js",
+    "dev": "nodemon ./src/index.js",
+    "lint": "eslint ./src --fix",
+    "test": "echo \"No test specified\" && exit 0"
   },
   "keywords": [
     "discord",
+    "bot",
+    "discord.js",
     "api",
     "syntx",
     "discordapp",
-    "bot",
-    "client"
+    "client",
+    "wrapper"
   ],
-  "authors": [
-    "Seraph",
-    "ERX'S PROJECTS"
-  ],
+  "author": "Seraph & ERX'S PROJECTS",
   "license": "MIT",
+  "homepage": "https://docs.erxproject.xyz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/erxproject/syntx.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/erxproject/syntx.js/issues"
+  },
   "dependencies": {
     "chalk": "^4.1.2",
     "discord.js": "^14.15.2",
     "dotenv": "^16.4.5"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/erxproject/syntx.js"
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "eslint": "^9.0.0"
   },
-  "bugs": {
-    "url": "https://github.com/syntx-js/syntx/issues"
-  },
-  "homepage": "https://docs.erxproject.xyz"
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
