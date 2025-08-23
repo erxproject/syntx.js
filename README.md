@@ -33,13 +33,14 @@
 Syntx.js is an NPM package designed to simplify and accelerate the creation of Discord bots. Although it is still under development, Syntx.js offers a wide range of functions for enhancing your bot. It utilizes a JSON-based structure for ease of use and flexibility. For further information or assistance, feel free to reach out to us via our [support server](https://discord.gg/invite/QQrSgyvykj) or through our [email syntxjs@gmail.com](https://mail.google.com/mail/u/0/?fs=1&to=syntxjs@gmail.com&su=Help+me&tf=cm).
 
 ## Installation
+- This project requires Node.js 18 or later.
 In NPM
-```console
+```bash
 $ npm i synxt.js
 ```
 
 In GitHub (recommended)
-```console
+```bash
 $ npm i github:erxproject/syntx.js
 ```
 
