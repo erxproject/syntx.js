@@ -1,11 +1,17 @@
+const errors = require("../../errors")
+const SOURCE = "cmd.random.number"
+
 function number(a, b) {
-    if (typeof(a) !== "number" || typeof(b) !== "number") {
-        throw new Error('"a" and "b" must be numbers.');
-    } else if (a >= b) {
-        throw new Error('"a" must not be equal to or less than "b".');
-    } else {
-        return Math.floor(Math.random() * (b - a) + a);
+    if (typeof a !== "number") errors.invalidType("a", "number", a, SOURCE)
+    if (typeof b !== "number") errors.invalidType("b", "number", b, SOURCE)
+    if (a >= b) {
+        errors.outOfRange("a", '"a" must be strictly less than "b".', SOURCE, {
+            expected: "a < b",
+            received: `a=${a}, b=${b}`,
+        })
     }
+
+    return Math.floor(Math.random() * (b - a) + a)
 }
 
-module.exports = number;
+module.exports = number

@@ -1,6 +1,6 @@
 {
   "name": "syntx.js",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Create Discord bots faster and easier with syntx.js",
   "main": "./src/index.js",
   "types": "./typings/index.d.ts",
@@ -21,8 +21,8 @@
     "wrapper"
   ],
   "author": "Seraph & ERX'S PROJECTS",
+  "homepage": "https://syntx-docs.vercel.app",
   "license": "MIT",
-  "homepage": "https://docs.erxproject.xyz",
   "repository": {
     "type": "git",
     "url": "https://github.com/erxproject/syntx.js.git"
@@ -31,13 +31,14 @@
     "url": "https://github.com/erxproject/syntx.js/issues"
   },
   "dependencies": {
+    "@erxprojects/syntx-db": "github:erxproject/syntx-db",
     "chalk": "^4.1.2",
-    "discord.js": "^14.15.2",
-    "dotenv": "^16.4.5"
+    "discord.js": "^14.26.4",
+    "dotenv": "^17.4.2"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0",
-    "eslint": "^9.0.0"
+    "eslint": "^9.0.0",
+    "nodemon": "^3.1.0"
   },
   "engines": {
     "node": ">=18.0.0"

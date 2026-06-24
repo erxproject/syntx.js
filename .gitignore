@@ -1,1 +1,7 @@
 node_modules/
+tests/
+.git/
+example/
+tests/
+.npmignore
+package-lock.json

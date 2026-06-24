@@ -1,15 +1,25 @@
-async function updateNick({ userID, serverID, nick }, client) {
-    if (!userID ||!nick ||!serverID || !client) throw new Error("Missing required parameters.");
+const errors = require("../../../errors")
 
-    const guild = client.bot.guilds.cache.get(serverID);
-    if (!guild) throw new Error("Server not found.");
+const SOURCE = "cmd.user.edit.nick"
 
-    const member = await guild.members.fetch(userID).catch(() => null);
-    if (!member) throw new Error("User not found in the server.");
+async function updateNick({ user, nick } = {}, message) {
+    if (!user) errors.missing("user", SOURCE)
+    if (nick === undefined) errors.missing("nick", SOURCE, { hint: "Pass a string to set a nickname, or null to reset it." })
+    if (!message?.guild) errors.missing("message", SOURCE, { hint: "Pass the Message instance (with a valid guild) as the second argument." })
 
-    await member.setNickname(nick).catch(err => {
-        throw new Error(`Failed to update nickname: ${err.message}`);
-    });
+    const guild = message.guild
+
+    const member = await guild.members.fetch(user.id ?? user).catch(() => null)
+    if (!member) errors.notFound("The target user", SOURCE, { hint: "They may not be in this server." })
+
+    try {
+        await member.setNickname(nick)
+    } catch (err) {
+        if (err instanceof errors.SyntxError) throw err
+        errors.api(nick === null ? "reset the user's nickname" : "update the user's nickname", SOURCE, err, {
+            hint: "The bot needs the Manage Nicknames permission and a higher role than the target.",
+        })
+    }
 }
 
-module.exports = updateNick;
+module.exports = updateNick

@@ -3,8 +3,8 @@ const { GatewayIntentBits } = require('discord.js');
 const all = [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildBans,
-    GatewayIntentBits.GuildEmojisAndStickers,
+    GatewayIntentBits.GuildModeration,
+    GatewayIntentBits.GuildExpressions,
     GatewayIntentBits.GuildIntegrations,
     GatewayIntentBits.GuildWebhooks,
     GatewayIntentBits.GuildInvites,
@@ -19,21 +19,23 @@ const all = [
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildScheduledEvents,
     GatewayIntentBits.AutoModerationConfiguration,
-    GatewayIntentBits.AutoModerationExecution
-]
+    GatewayIntentBits.AutoModerationExecution,
+    GatewayIntentBits.GuildMessagePolls,
+    GatewayIntentBits.DirectMessagePolls
+];
 
 const fast = [
     GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildMessages
-]
+    GatewayIntentBits.GuildMembers
+];
 
 module.exports = {
     Guilds: GatewayIntentBits.Guilds,
     GuildMembers: GatewayIntentBits.GuildMembers,
-    GuildBans: GatewayIntentBits.GuildBans,
-    GuildEmojisAndStickers: GatewayIntentBits.GuildEmojisAndStickers,
+    GuildModeration: GatewayIntentBits.GuildModeration,
+    GuildExpressions: GatewayIntentBits.GuildExpressions,
     GuildIntegrations: GatewayIntentBits.GuildIntegrations,
     GuildWebhooks: GatewayIntentBits.GuildWebhooks,
     GuildInvites: GatewayIntentBits.GuildInvites,
@@ -49,6 +51,8 @@ module.exports = {
     GuildScheduledEvents: GatewayIntentBits.GuildScheduledEvents,
     AutoModerationConfiguration: GatewayIntentBits.AutoModerationConfiguration,
     AutoModerationExecution: GatewayIntentBits.AutoModerationExecution,
+    GuildMessagePolls: GatewayIntentBits.GuildMessagePolls,
+    DirectMessagePolls: GatewayIntentBits.DirectMessagePolls,
     All: all,
     Fast: fast
 };

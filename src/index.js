@@ -1,30 +1,26 @@
 const discord = require("discord.js");
+const errors = require("./errors");
 const ERXClient = require("./classes/client");
+const SlashCommand = require("./classes/SlashCommand.js")
 const Embed = require("./classes/embed")
-const { Var } = require("./classes/variables");
-const Buttons = require("./classes/interactions/buttons");
-const SelectMenus = require("./classes/interactions/selectMenus");
-const Modal = require("./classes/interactions/modal")
+const { Database: SyntxDB, Scope } = require("@erxprojects/syntx-db");
+const Buttons = require("./classes/components/buttons");
+const SelectMenus = require("./classes/components/selectMenus");
+const Modal = require("./classes/components/modal")
+const Display = require("./classes/components/display")
+const Poll = require("./classes/poll")
 const text = require("./functions/random/text");
 const number = require("./functions/random/number");
 const intents = require("./intents/intents");
 const argument = require("./functions/message/argument");
 const send = require("./functions/message/sendMessage");
 const clientId = require("./functions/client/id");
-const username = require("./functions/user/username")
-const authorId = require("./functions/user/authorId");
 const avatar = require("./functions/user/avatar");
-const mentionedUser = require("./functions/message/mentioned");
-const guildId = require("./functions/guild/id")
+const mentions = require("./functions/message/mentions");
 const content = require("./functions/message/content");
 const data = require("./functions/message/data");
 const channelId = require("./functions/channel/id");
 const ping = require("./functions/client/ping");
-const mentionedChannel = require("./functions/channel/mentioned");
-const perms = require("./functions/user/perms");
-const nick = require("./functions/user/nick");
-const displayName = require("./functions/user/displayName");
-const name = require("./functions/guild/name");
 const edit = require("./functions/message/edit");
 const addReactions = require("./functions/message/addReactions");
 const messageId = require("./functions/message/id");
@@ -34,6 +30,7 @@ const userInfo = require("./functions/user/info")
 const serverInfo = require("./functions/guild/info");
 const channelInfo = require("./functions/channel/info");
 const roleInfo = require("./functions/role/info")
+const createRole = require("./functions/role/create")
 const addRole = require("./functions/user/edit/roles/add")
 const removeRole = require("./functions/user/edit/roles/remove")
 const updateUser = require("./functions/user/edit/nick")
@@ -48,12 +45,19 @@ const editChannel = require("./functions/channel/edit")
 module.exports = {
     ...discord,
     ERXClient,
+    SlashCommand,
     Intents: intents,
     Embed,
-    Var,
+    SyntxDB,
+    Scope,
+    errors,
+    SyntxError: errors.SyntxError,
+    ErrorCodes: errors.ErrorCodes,
     Buttons,
     SelectMenus,
     Modal,
+    Display,
+    Poll,
     cmd: {
         random: {
             text,
@@ -61,19 +65,19 @@ module.exports = {
         },
         channel: {
             id: channelId,
-            mentioned: mentionedChannel,
             create: Object.assign(channelCreate, { thread }),
             info: channelInfo,
             delete: deleteChannel,
             edit: editChannel
         },
         role: {
-            info: roleInfo
+            info: roleInfo,
+            create: createRole
         },
         message: {
             argument,
             send,
-            mentioned: mentionedUser,
+            mentions,
             id: messageId,
             content,
             data,
@@ -85,12 +89,7 @@ module.exports = {
             ping
         },
         user: {
-            username,
-            authorId,
             avatar,
-            perms,
-            nick,
-            displayName,
             timeout,
             untimeout,
             ban,
@@ -105,8 +104,6 @@ module.exports = {
             }
         },
         guild: {
-            id: guildId,
-            name,
             info: serverInfo
         }
     }

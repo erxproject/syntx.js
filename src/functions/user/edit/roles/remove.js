@@ -1,45 +1,43 @@
+const errors = require("../../../../errors")
+
+const SOURCE = "cmd.user.edit.roles.remove"
+
 async function removeRoles({ user, roles }, message) {
-    if (!user) {
-        throw new Error("Parameter 'user' is required.");
+    if (!user) errors.missing("user", SOURCE)
+    if (!roles) errors.missing("roles", SOURCE, { hint: 'Provide an array of role IDs, e.g. ["123", "456"].' })
+    if (!Array.isArray(roles)) {
+        errors.invalidType("roles", "an array of role IDs", roles, SOURCE)
     }
-
-    if (!roles || !Array.isArray(roles)) {
-        throw new Error("Parameter 'roles' must be an array of role IDs.");
-    }
-
     if (roles.length === 0) {
-        throw new Error("Roles array is empty. Provide at least one role ID.");
+        errors.invalidValue("roles", "The roles array is empty.", SOURCE, { hint: "Provide at least one role ID." })
     }
-
-    // Validación simple para strings
     for (const roleID of roles) {
         if (typeof roleID !== "string") {
-            throw new Error("All role IDs in 'roles' array must be strings.");
+            errors.invalidType("roles[]", "string role IDs", roleID, SOURCE)
         }
     }
 
-    const guild = message.guild;
-    if (!guild) {
-        throw new Error("This function must be executed inside a guild.");
-    }
+    const guild = message?.guild
+    if (!guild) errors.usage("This function must be executed inside a guild.", SOURCE)
 
-    const member = await guild.members.fetch(user).catch(() => null);
-    if (!member) {
-        throw new Error("User not found in this guild.");
-    }
+    const member = await guild.members.fetch(user).catch(() => null)
+    if (!member) errors.notFound("The target user", SOURCE, { hint: "They may have left the guild." })
 
     for (const roleID of roles) {
-        const role = guild.roles.cache.get(roleID);
+        const role = guild.roles.cache.get(roleID)
         if (!role) {
-            throw new Error(`Role with ID "${roleID}" does not exist in this guild.`);
+            errors.notFound(`Role with ID "${roleID}"`, SOURCE, { hint: "Check that the role exists in this guild." })
         }
 
         try {
-            await member.roles.remove(role);
+            await member.roles.remove(role)
         } catch (err) {
-            throw new Error(`Failed to remove role "${roleID}" from user: ${err.message}`);
+            if (err instanceof errors.SyntxError) throw err
+            errors.api(`remove role "${roleID}" from the user`, SOURCE, err, {
+                hint: "The bot's role must be above the role it is trying to remove.",
+            })
         }
     }
 }
 
-module.exports = removeRoles;
+module.exports = removeRoles

@@ -1,4 +1,7 @@
-const { PermissionsBitField, ChannelType } = require("discord.js")
+const { PermissionsBitField, ChannelType, OverwriteType } = require("discord.js") // + OverwriteType
+const errors = require("../../errors")
+
+const SOURCE = "cmd.channel.create"
 
 const channelTypes = {
     text: ChannelType.GuildText,
@@ -8,27 +11,31 @@ const channelTypes = {
     category: ChannelType.GuildCategory
 }
 
-// Convierte VIEW_CHANNEL → ViewChannel, SEND_MESSAGES → SendMessages, etc.
 function toCamelCase(str) {
     return str.toLowerCase().replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()).replace(/^([a-z])/, (_, l) => l.toUpperCase())
 }
 
 async function create({ data = {}, permissions = [], returnID = false }, message) {
     if (!message?.guild) {
-        throw new Error("Invalid message object: 'message.guild' is required.")
+        errors.usage("This function can only be used inside a guild.", SOURCE, {
+            hint: "Pass a guild message/interaction as the second argument.",
+        })
     }
 
     if (!data?.name) {
-        throw new Error("Missing channel name: 'data.name' is required.")
+        errors.missing("data.name", SOURCE, { hint: "Provide a channel name inside the data object." })
     }
 
     if (data.type && !channelTypes[data.type]) {
         const valid = Object.keys(channelTypes).join(", ")
-        throw new Error(`Invalid channel type '${data.type}'. Valid types are: ${valid}.`)
+        errors.invalidValue("data.type", `Invalid channel type "${data.type}".`, SOURCE, {
+            expected: valid,
+            received: data.type,
+        })
     }
 
     const isCategory = data.type === "category"
-    
+
     if (isCategory) {
         const forbiddenFields = []
         if (data.category) forbiddenFields.push("category")
@@ -39,8 +46,10 @@ async function create({ data = {}, permissions = [], returnID = false }, message
         if (data.rateLimitPerUser !== undefined) forbiddenFields.push("rateLimitPerUser")
 
         if (forbiddenFields.length > 0) {
-            throw new Error(
-                `The following fields cannot be used when creating a category channel: ${forbiddenFields.join(", ")}.`
+            errors.usage(
+                `The following fields cannot be used when creating a category channel: ${forbiddenFields.join(", ")}.`,
+                SOURCE,
+                { hint: "Remove those fields or create a non-category channel." },
             )
         }
     }
@@ -63,7 +72,7 @@ async function create({ data = {}, permissions = [], returnID = false }, message
         const isEveryone = perm.id === "everyone"
         const overwrite = {
             id: isEveryone ? message.guild.id : perm.id,
-            type: perm.type === "user" ? 1 : 0,
+            type: perm.type === "user" ? OverwriteType.Member : OverwriteType.Role, // Era: 1 : 0
             allow: [],
             deny: []
         }
@@ -79,7 +88,16 @@ async function create({ data = {}, permissions = [], returnID = false }, message
         options.permissionOverwrites.push(overwrite)
     }
 
-    const channel = await message.guild.channels.create(options)
+    let channel
+    try {
+        channel = await message.guild.channels.create(options)
+    } catch (err) {
+        if (err instanceof errors.SyntxError) throw err
+        errors.api("create the channel", SOURCE, err, {
+            hint: "The bot needs the Manage Channels permission in this guild.",
+        })
+    }
+
     return returnID ? channel.id : channel
 }
 
