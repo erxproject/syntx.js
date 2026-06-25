@@ -1,6 +1,6 @@
 {
   "name": "syntx.js",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Create Discord bots faster and easier with syntx.js",
   "main": "./src/index.js",
   "types": "./typings/index.d.ts",
