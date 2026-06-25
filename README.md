@@ -96,9 +96,7 @@ client.command({
     name: "hi",
     alias: ["hello", "hey"],
     content: async (message) => {
-        const userId = cmd.user.authorId(message)
-        const username = await cmd.user.username(userId, client)
-        cmd.message.send({ text: `Hello, ${username}!` }, message)
+        cmd.message.send({ text: `Hello, ${message.author.username}!` }, message)
     }
 })
 
